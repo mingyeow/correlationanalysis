@@ -19,6 +19,9 @@ def find_ratio(r1, r2):
 def find_devitation(r, min_r):
     return r/min_r
 
+def find_recommended_amp(d):
+    return 1
+
 def download_data(symbol):
     now = int(time.time())
     year_ago = now - (365*24*60*60)
@@ -29,46 +32,41 @@ def download_data(symbol):
     p=raw_data["prices"]
     return p
 
-name1 = "kyber-network"
-data1 = download_data(name1)
+def find_coin_id(symbol):    
+    with open("coinlist.json") as json_file:
+        data1 = json.load(json_file)
+    for x in data1:
+        if x["symbol"] == symbol:
+            return x["id"]
 
-name2 = "usd-coin"
-data2 = download_data(name2)
 
+# get id and data for first coin
+name1 = input("First Symbol? ")
+id1 = find_coin_id(name1)
+data1 = download_data(id1)
+
+# get id and data for second coin
+name2 = input("Second Symbol? ")
+id2 = find_coin_id(name2)
+data2 = download_data(id2)
+
+# create the ratios
 ratios = list(map(find_ratio, data1, data2))
 
+# get min/max and max_deviations
 max = max(ratios)
 min = min(ratios)
 max_deviation = max/min
+recommended_amp = find_recommended_amp(max_deviation)
 
-pyplot.subplot(1, 2, 1)
+#get the ratios
+ratio_deriatives = list(map(lambda r: r/min, ratios))
+
+pyplot.text(0.15, 0.95, f"max deviation: {str(max_deviation)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.15, 0.9, f"recommended amp: {str(recommended_amp)}" , transform=pyplot.gcf().transFigure)
+
+# plot the ratios
 pyplot.plot(ratios)
 pyplot.xlabel("time")
 pyplot.ylabel(name1 + "/" + name2 + " ratio")
-pyplot.text(0.3, 0.9, "max deviation:" + str(max_deviation), transform=pyplot.gcf().transFigure)
-
-pyplot.subplot(1, 2, 2)
-deviations = [0, 1, 2, 3, 4]
-pyplot.xlabel("proportion to min")
-
-pyplot.plot(deviations)
-
 pyplot.show()
-
-# with open(get_filename(symbol), 'w') as outfile:
-#     json.dump(p, outfile)
-# check if files exists. if not, download
-# try:
-#     f1 = open(file1)
-# except:
-#     download_data(name1)
-# def check_or_download(name):
-#     return True
-# check_or_download(name2)
-# file2 = f"data/{name2}.json"
-# with open(file1) as json_file:
-#     data1 = json.load(json_file)
-
-# with open(file2) as json_file:
-#     name2 = "eth"
-#     data2 = json.load(json_file)

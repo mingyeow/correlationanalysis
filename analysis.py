@@ -1,13 +1,17 @@
-#write max supported amplification
-# plot out max deviation
+# cater to shortest array
 
 import json
 import requests
 import time
+import copy
 
 from numpy import mean
 from numpy import std
+from numpy import cov
 from matplotlib import pyplot
+from scipy.stats import spearmanr
+
+days = 100
 
 def get_filename(symbol):
     return f'{symbol}.json'
@@ -15,6 +19,9 @@ def get_filename(symbol):
 def find_ratio(r1, r2):
     assert (r1[0] == r2[0])
     return float(r1[1])/float(r2[1])
+
+def get_price(r):
+    return float(r[1])
 
 def find_devitation(r, min_r):
     return r/min_r
@@ -25,7 +32,7 @@ def find_recommended_amp(d):
 
 def download_data(symbol):
     now = int(time.time())
-    year_ago = now - (365*24*60*60)
+    year_ago = now - (days*24*60*60)
 
     u = f"https://api.coingecko.com/api/v3/coins/{symbol}/market_chart/range?vs_currency=usd&from={year_ago}&to={now}"
     r = requests.get(u)
@@ -50,29 +57,49 @@ id2 = find_coin_id(name2)
 
 #  get data
 data1 = download_data(id1)
+prices1 = list(map(get_price, data1))
+
 data2 = download_data(id2)
+prices2 = list(map(get_price, data2))
 
 # create the ratios
 ratios = list(map(find_ratio, data1, data2))
 
 # get min/max and max_deviations
-max = max(ratios)
-min = min(ratios)
-
-max_deviation = max/min
-recommended_amp = find_recommended_amp(max_deviation)
+max_ratio = max(ratios)
+min_ratio = min(ratios)
+mean = mean(ratios)
+amplitude = max_ratio/min_ratio
+recommended_amp = find_recommended_amp(amplitude)
 standard_deviation = std(ratios)
+standard_deviation_to_mean = standard_deviation/mean
+
+
+# trim off outliers
+trimmed_ratios = copy.deepcopy(ratios)
+trimmed_ratios.remove(max(trimmed_ratios))
+trimmed_ratios.remove(max(trimmed_ratios))
+trimmed_ratios.remove(min(trimmed_ratios))
+trimmed_ratios.remove(min(trimmed_ratios))
+
+trimmed_max =  max(trimmed_ratios)
+trimmed_min =  min(trimmed_ratios)
+trimmed_amplitude = trimmed_max/trimmed_min
+recommended_trimmed_amp = find_recommended_amp(trimmed_amplitude)
 
 #get the ratios
-ratio_deriatives = list(map(lambda r: r/min, ratios))
+ratio_deriatives = list(map(lambda r: r/min_ratio, ratios))
+# correlation = cov(data1,  data2)
+# corr, _ = spearmanr(prices1, prices2)
 
-pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.12, 0.9, f"max ratio/min ratio: {'{:.4f}'.format(max_deviation)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.5, 0.95, f"max amp to cater: {'{:.4f}'.format(recommended_amp)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.5, 0.9, f"standard deviation: {'{:.4f}'.format(std(ratios))}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.12, 0.95, f"SD to mean: {'{:.2f}'.format(standard_deviation_to_mean)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.12, 0.9, f"amplitude: {'{:.2f}'.format(amplitude)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.4, 0.95, f"amplification: {'{:.2f}'.format(recommended_amp)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.4, 0.9, f"amplification(ex 1% outliers): {'{:.2f}'.format(recommended_trimmed_amp)}" , transform=pyplot.gcf().transFigure)
 
 # plot the ratios
 pyplot.plot(ratios)
-pyplot.xlabel("last year")
+pyplot.xlabel(f"last {days} days")
 pyplot.ylabel(name1 + "/" + name2 + " ratio")
 pyplot.show()

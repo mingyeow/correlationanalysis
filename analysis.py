@@ -11,7 +11,7 @@ from numpy import cov
 from matplotlib import pyplot
 from scipy.stats import spearmanr
 
-days = 100
+days = 365
 
 def get_filename(symbol):
     return f'{symbol}.json'
@@ -92,11 +92,15 @@ ratio_deriatives = list(map(lambda r: r/min_ratio, ratios))
 # correlation = cov(data1,  data2)
 # corr, _ = spearmanr(prices1, prices2)
 
-# pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.12, 0.95, f"SD to mean: {'{:.2f}'.format(standard_deviation_to_mean)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.12, 0.9, f"amplitude: {'{:.2f}'.format(amplitude)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.4, 0.95, f"amplification: {'{:.2f}'.format(recommended_amp)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.4, 0.9, f"amplification(ex 1% outliers): {'{:.2f}'.format(recommended_trimmed_amp)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.12, 0.9, f"SD to mean: {'{:.3f}'.format(standard_deviation_to_mean)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.4, 0.95, f"amplitude: {'{:.3f}'.format(amplitude)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.4, 0.9, f"amplitude (ex outliers): {'{:.3f}'.format(trimmed_amplitude)}" , transform=pyplot.gcf().transFigure)
+
+# pyplot.text(0.12, 0.95, f"SD to mean: {'{:.3f}'.format(standard_deviation_to_mean)}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.12, 0.9, f"amplitude: {'{:.3f}'.format(amplitude)}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.4, 0.95, f"amplification: {'{:.3f}'.format(recommended_amp)}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.4, 0.9, f"amplification(ex 1% outliers): {'{:.3f}'.format(recommended_trimmed_amp)}" , transform=pyplot.gcf().transFigure)
 
 # plot the ratios
 pyplot.plot(ratios)

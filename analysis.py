@@ -11,7 +11,7 @@ from numpy import cov
 from matplotlib import pyplot
 from scipy.stats import spearmanr
 
-days = 100
+days = 365
 
 def get_filename(symbol):
     return f'{symbol}.json'
@@ -88,24 +88,52 @@ trimmed_min =  min(trimmed_ratios)
 trimmed_amplitude = trimmed_max/trimmed_min
 recommended_trimmed_amp = find_recommended_amp(trimmed_amplitude)
 
-higher_max_ratio = max(trimmed_max/1, 1/trimmed_min)
-recommended_amp_assuming_mean_start = find_recommended_amp(higher_max_ratio/mean)
-
+higher_max_ratio = max([trimmed_max/1, 1/trimmed_min])
+amplitude_from_mean = higher_max_ratio/mean
+recommended_amp_assuming_mean_start = find_recommended_amp(amplitude_from_mean)
 
 #get the ratios
 ratio_deriatives = list(map(lambda r: r/min_ratio, ratios))
 # correlation = cov(data1,  data2)
 # corr, _ = spearmanr(prices1, prices2)
 
+print("ALL DATA POINTS")
+print(f"max ratio: {max(trimmed_ratios)}")
+print(f"min ratio: {min(trimmed_ratios)}")
+print(f"amplitude: {amplitude}")
+print(f"amplification factor: {recommended_amp}")
+
+
+print("\n")
+print("EXCLUDING ~1%")
+print(f"max trimmed ratio: {max(trimmed_ratios)}")
+print(f"min trimmed ratio: {min(trimmed_ratios)}")
+print(f"amplitude (ex outliers): {trimmed_amplitude}")
+print(f"amplification (ex outliers): {recommended_trimmed_amp}")
+
+print("\n")
+print("FROM MEAN")
+print(f"mean: {mean}")
+print(f"amplitude (ex outliers, from mean): {amplitude_from_mean}")
+print(f"amplification (ex outliers, from mean): {recommended_amp_assuming_mean_start}")
+
+
+
 # pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
 # pyplot.text(0.12, 0.9, f"SD to mean: {'{:.3f}'.format(standard_deviation_to_mean)}" , transform=pyplot.gcf().transFigure)
 # pyplot.text(0.4, 0.95, f"amplitude: {'{:.3f}'.format(amplitude)}" , transform=pyplot.gcf().transFigure)
 # pyplot.text(0.4, 0.9, f"amplitude (ex outliers): {'{:.3f}'.format(trimmed_amplitude)}" , transform=pyplot.gcf().transFigure)
 
-pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.12, 0.9, f"amplification: {'{:.3f}'.format(recommended_amp)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.4, 0.95, f"amplification(ex 1% outliers): {'{:.3f}'.format(recommended_trimmed_amp)}" , transform=pyplot.gcf().transFigure)
-pyplot.text(0.4, 0.9, f"amplification(starting from mean): {'{:.3f}'.format(recommended_amp_assuming_mean_start)}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.12, 0.95, f"pair: {name1} / {name2}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.12, 0.9, f"amplification: {'{:.3f}'.format(recommended_amp)}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.4, 0.95, f"amplification(ex 1% outliers): {'{:.3f}'.format(recommended_trimmed_amp)}" , transform=pyplot.gcf().transFigure)
+# pyplot.text(0.4, 0.9, f"amplification(starting from mean): {'{:.3f}'.format(recommended_amp_assuming_mean_start)}" , transform=pyplot.gcf().transFigure)
+
+pyplot.text(0.05, 0.95, f"amplitude(ex 1%): {'{:.3f}'.format(trimmed_amplitude)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.05, 0.9, f"amplitude (ex 1%, from mean): {'{:.3f}'.format(amplitude_from_mean)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.5, 0.95, f"amplification: {'{:.3f}'.format(recommended_trimmed_amp)}" , transform=pyplot.gcf().transFigure)
+pyplot.text(0.5, 0.9, f"amplification(ex 1%, from mean): {'{:.3f}'.format(recommended_amp_assuming_mean_start)}" , transform=pyplot.gcf().transFigure)
+
 
 # plot the ratios
 pyplot.plot(ratios)
